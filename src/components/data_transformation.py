@@ -83,9 +83,6 @@ class DataTransformation:
             target_column_name = "math_Score"
             numerical_Columns = ["writing_score", "reading_Score"]
 
-            if target_column_name not in train_df.columns or target_column_name not in test_df.columns:
-                raise ValueError(f"Column '{target_column_name}' not found in both train and test dataframes")
-
             input_feature_train_df = train_df.drop(columns=[target_column_name], axis=1)
             target_feature_train_df = train_df[target_column_name]
 
@@ -121,3 +118,9 @@ class DataTransformation:
         
         except Exception as e:
             raise CustomException(e, sys)
+        
+
+        """
+            if target_column_name not in train_df.columns or target_column_name not in test_df.columns:
+                raise ValueError(f"Column '{target_column_name}' not found in both train and test dataframes")
+        """
