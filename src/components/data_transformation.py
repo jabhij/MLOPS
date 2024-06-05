@@ -90,7 +90,7 @@ class DataTransformation:
             target_feature_test_df = test_df[target_column_name]
 
             logging.info(
-                f"Applying Preprocessing Object on Training & Testing Dataframe!"
+                f"Splitting Data into Input Features and Target Features - Completed!"
             )
 
             input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
@@ -99,9 +99,11 @@ class DataTransformation:
             train_arr = np.c_[
                 input_feature_train_arr, np.array(target_feature_train_df)
             ]
-            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
+            test_arr = np.c_[
+                input_feature_test_arr, np.array(target_feature_test_df)
+            ]
 
-            logging.info(f"Saved Preprocessing Object!")
+            logging.info(f"Saved Preprocessing Object!")         
 
             save_object(
 
