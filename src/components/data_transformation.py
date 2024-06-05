@@ -77,16 +77,39 @@ class DataTransformation:
 
             logging.info("Read - Train & Test Data Completed!")
 
+            # Debug print statements
+            # ----------------------
+            """
+            print("Train DataFrame columns:", train_df.columns)
+            print("Test DataFrame columns:", test_df.columns)
+            """
+
             logging.info("Obtaining Preprocesing Object!")
             preprocessing_obj = self.get_data_transformation_object()
 
-            target_column_name = "math_Score"
-            numerical_Columns = ["writing_score", "reading_Score"]
+            target_column_name = "math_score"
+            numerical_Columns = ["writing_score", "reading_score"]
+
+            # Check if numerical columns exist in the data
+            # --------------------------------------------
+            """
+            for col in numerical_Columns:
+                if col not in train_df.columns:
+                    raise CustomException(f"Column '{col}' not found in training data", sys)
+                if col not in test_df.columns:
+                    raise CustomException(f"Column '{col}' not found in test data", sys)
+
+            if target_column_name not in train_df.columns:
+                raise CustomException(f"Target column '{target_column_name}' not found in training data", sys)
+        
+            if target_column_name not in test_df.columns:
+                raise CustomException(f"Target column '{target_column_name}' not found in test data", sys)
+            """
 
             input_feature_train_df = train_df.drop(columns=[target_column_name], axis=1)
             target_feature_train_df = train_df[target_column_name]
 
-            input_feature_test_df = test_df.drop(columns=[target_column_name],axis=1)
+            input_feature_test_df = test_df.drop(columns=[target_column_name], axis=1)
             target_feature_test_df = test_df[target_column_name]
 
             logging.info(
