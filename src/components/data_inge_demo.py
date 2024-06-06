@@ -2,154 +2,90 @@
 For debug purpose only
 """
 
-import sys
+# Model Trainer file
 import os
+import sys
 from dataclasses import dataclass
-import numpy as np
-import pandas as pd
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+from catboost import CatBoostRegressor
+from sklearn.ensemble import (
+    AdaBoostRegressor,
+    GradientBoostingRegressor,
+    RandomForestRegressor,
+)
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from xgboost import XGBRFRegressor
 
 from src.exception import CustomException
 from src.logger import logging
+
 from src.utils import save_object
+from src.utils import evaluate_models
+
 
 @dataclass
-class DataTransformationConfig:
-    preprocessor_obj_file_path = os.path.join('artifacts', "preprocessor.pkl")
+class ModelTrainerConfig:
+    """
+    Model Trainer Config class
+    """
+    trained_model_file_path = os.path.join("artifacts", "model.pkl")
 
-
-class DataTransformation:
+class ModelTrainer:
     def __init__(self):
-        self.data_transformation_config = DataTransformationConfig
+        self.model_trainer_config = ModelTrainerConfig()
 
-
-    def get_data_transformation_object(self):
-        """
-        Function - responsible for data transformation
-        """
+    def initiate_model_trainer(self, train_array, test_array):
         try:
-            numerical_columns = ["writing_score", "reading_score"]
-            categorical_columns = [
-                "gender",
-                "race_ethnicity",
-                "parental_level_of_education",
-                "lunch",
-                "test_preparation_course"
-            ]
-
-            num_pipeline = Pipeline(
-                steps=[
-                    ("imputer", SimpleImputer(strategy="median")),   # Handling missing values
-                    ("scaler", StandardScaler())    # Standard scaling
-                ]
+            logging.info("Split Train-Test Data!")
+            X_train, y_train, X_test, y_test = (
+                train_array[:, :-1],
+                train_array[:, -1],
+                test_array[:, :-1],
+                test_array[:, -1],
             )
+
+            models = {
+                "Random Forest": RandomForestRegressor(),
+                "Decision Tree": DecisionTreeRegressor(),
+                "K Neighbors": KNeighborsRegressor(),
+                "Linear Regression": LinearRegression(),
+                "Ada Boost": AdaBoostRegressor(),
+                "Gradient Boost": GradientBoostingRegressor(),
+                "Cat Boost": CatBoostRegressor(),
+                "XG Boost": XGBRFRegressor(),                
+            }
+
+            model_report:dict = evaluate_models(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, 
+                                                param=params, models=models)
             
-            cat_pipeline = Pipeline(
-                steps=[
-                    ("imputer", SimpleImputer(strategy="most_frequent")),   # Handling missing values
-                    ("one_hot_encoder", OneHotEncoder(handle_unknown="ignore")),     # One hot encoding
-                    ("scaler", StandardScaler)
-                ]
-            )
+            # Get - best score for models from dict
+            best_model_score = max(sorted(model_report.values()))   
 
-            logging.info("Numerical Columns Standard Scaling - Completed!")
-            logging.info(f"Numerical Columns: {numerical_columns}")
-
-            logging.info("Categorical Columns Encoding - Completed!")
-            logging.info(f"Categorical Columns: {categorical_columns}")
-
-            preprocessor = ColumnTransformer(
-                [
-                    ("num_pipeline", num_pipeline, numerical_columns),
-                    ("cat_pipeline", cat_pipeline, categorical_columns)
-                ]
-            )
-
-            return preprocessor
-
-        except Exception as e:
-            raise CustomException(e, sys)
-        
-
-    def initiate_data_transformation(self, train_path, test_path):
-        try:
-            train_df = pd.read_csv(train_path)
-            test_df = pd.read_csv(test_path)
-
-            logging.info("Read - Train & Test Data Completed!")
-
-            # Debug print statements
-            # ----------------------
-            """
-            print("Train DataFrame columns:", train_df.columns)
-            print("Test DataFrame columns:", test_df.columns)
-            """
-
-            logging.info("Obtaining Preprocesing Object!")
-            preprocessing_obj = self.get_data_transformation_object()
-
-            target_column_name = "math_score"
-            numerical_Columns = ["writing_score", "reading_score"]
-
-            # Check if numerical columns exist in the data
-            # --------------------------------------------
-            """
-            for col in numerical_Columns:
-                if col not in train_df.columns:
-                    raise CustomException(f"Column '{col}' not found in training data", sys)
-                if col not in test_df.columns:
-                    raise CustomException(f"Column '{col}' not found in test data", sys)
-
-            if target_column_name not in train_df.columns:
-                raise CustomException(f"Target column '{target_column_name}' not found in training data", sys)
-        
-            if target_column_name not in test_df.columns:
-                raise CustomException(f"Target column '{target_column_name}' not found in test data", sys)
-            """
-
-            input_feature_train_df = train_df.drop(columns = [target_column_name], axis=1)
-            target_feature_train_df = train_df[target_column_name]
-
-            input_feature_test_df = test_df.drop(columns = [target_column_name], axis=1)
-            target_feature_test_df = test_df[target_column_name]
-
-            logging.info(
-                f"Splitting Data into Input Features and Target Features - Completed!"
-            )
-
-            input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
-            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
-
-            train_arr = np.c_[
-                input_feature_train_arr, np.array(target_feature_train_df)
+            best_model_name = list(model_report.keys())[
+                list(model_report.values()).index(best_model_score)
             ]
-            test_arr = np.c_[
-                input_feature_test_arr, np.array(target_feature_test_df)
-            ]
+            best_model = models[best_model_name]
 
-            logging.info(f"Saved Preprocessing Object!")         
+            if best_model_score < 0.6:
+                raise CustomException("No Better Model FOund!")
+            logging.info("No best model found for Train & Test Data!")
+
 
             save_object(
-
-                file_path = self.data_transformation_config.preprocessor_obj_file_path,
-                obj = preprocessing_obj
-
+                file_path = self.model_trainer_config.trained_model_file_path,
+                obj = best_model
             )
 
-            return (
-                train_arr,
-                test_arr,
-                self.data_transformation_config.preprocessor_obj_file_path,
-            )
-        
-        except Exception as e:
+            predicted = best_model.predict(X_test)
+
+            r2_score = r2_score(y_test, predicted)
+            return r2_score
+
+
+        except CustomException as e:
             raise CustomException(e, sys)
-        
-
-        """
-            if target_column_name not in train_df.columns or target_column_name not in test_df.columns:
-                raise ValueError(f"Column '{target_column_name}' not found in both train and test dataframes")
-        """
+            
