@@ -1,3 +1,7 @@
+"""
+For debug purpose only
+"""
+
 import sys
 import os
 from dataclasses import dataclass
@@ -19,7 +23,8 @@ class DataTransformationConfig:
 
 class DataTransformation:
     def __init__(self):
-        self.data_transformation_config = DataTransformationConfig()
+        self.data_transformation_config = DataTransformationConfig
+
 
     def get_data_transformation_object(self):
         """
@@ -45,7 +50,8 @@ class DataTransformation:
             cat_pipeline = Pipeline(
                 steps=[
                     ("imputer", SimpleImputer(strategy="most_frequent")),   # Handling missing values
-                    ("one_hot_encoder", OneHotEncoder(handle_unknown="ignore"))  # One hot encoding
+                    ("one_hot_encoder", OneHotEncoder(handle_unknown="ignore")),     # One hot encoding
+                    ("scaler", StandardScaler)
                 ]
             )
 
@@ -66,6 +72,7 @@ class DataTransformation:
 
         except Exception as e:
             raise CustomException(e, sys)
+        
 
     def initiate_data_transformation(self, train_path, test_path):
         try:
@@ -74,16 +81,39 @@ class DataTransformation:
 
             logging.info("Read - Train & Test Data Completed!")
 
-            logging.info("Obtaining Preprocessing Object!")
+            # Debug print statements
+            # ----------------------
+            """
+            print("Train DataFrame columns:", train_df.columns)
+            print("Test DataFrame columns:", test_df.columns)
+            """
+
+            logging.info("Obtaining Preprocesing Object!")
             preprocessing_obj = self.get_data_transformation_object()
 
             target_column_name = "math_score"
-            numerical_columns = ["writing_score", "reading_score"]
+            numerical_Columns = ["writing_score", "reading_score"]
 
-            input_feature_train_df = train_df.drop(columns=[target_column_name], axis=1)
+            # Check if numerical columns exist in the data
+            # --------------------------------------------
+            """
+            for col in numerical_Columns:
+                if col not in train_df.columns:
+                    raise CustomException(f"Column '{col}' not found in training data", sys)
+                if col not in test_df.columns:
+                    raise CustomException(f"Column '{col}' not found in test data", sys)
+
+            if target_column_name not in train_df.columns:
+                raise CustomException(f"Target column '{target_column_name}' not found in training data", sys)
+        
+            if target_column_name not in test_df.columns:
+                raise CustomException(f"Target column '{target_column_name}' not found in test data", sys)
+            """
+
+            input_feature_train_df = train_df.drop(columns = [target_column_name], axis=1)
             target_feature_train_df = train_df[target_column_name]
 
-            input_feature_test_df = test_df.drop(columns=[target_column_name], axis=1)
+            input_feature_test_df = test_df.drop(columns = [target_column_name], axis=1)
             target_feature_test_df = test_df[target_column_name]
 
             logging.info(
@@ -103,8 +133,10 @@ class DataTransformation:
             logging.info(f"Saved Preprocessing Object!")         
 
             save_object(
-                file_path=self.data_transformation_config.preprocessor_obj_file_path,
-                obj=preprocessing_obj
+
+                file_path = self.data_transformation_config.preprocessor_obj_file_path,
+                obj = preprocessing_obj
+
             )
 
             return (
@@ -115,3 +147,9 @@ class DataTransformation:
         
         except Exception as e:
             raise CustomException(e, sys)
+        
+
+        """
+            if target_column_name not in train_df.columns or target_column_name not in test_df.columns:
+                raise ValueError(f"Column '{target_column_name}' not found in both train and test dataframes")
+        """
