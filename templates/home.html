@@ -1,111 +1,267 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Exam Performance Indicator</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .login {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #343a40;
+            font-weight: 700;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            font-size: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background-color: #000;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background-color: #000;
+            opacity: 0.65;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+
+        .text-center {
+            margin-top: 20px;
+        }
+
+        .result-container,
+        .error-container {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .result-container {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error-container {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .spinner-border {
+            display: none;
+        }
+
+        .loading .spinner-border {
+            display: inline-block;
+        }
+
+        .loading .btn-text {
+            display: none;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-group .form-label {
+            flex: 1;
+            text-align: left;
+            margin-bottom: 0;
+        }
+
+        .form-group .form-select,
+        .form-group .form-control {
+            flex: 2;
+            margin-left: 20px;
+            appearance: none;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            background: #fff;
+            background-image: linear-gradient(45deg, transparent 50%, #007bff 50%), linear-gradient(135deg, #007bff 50%, transparent 50%), linear-gradient(to right, #ccc, #ccc);
+            background-position: calc(100% - 10px) calc(100% - 10px), calc(100% - 5px) calc(100% - 5px), 100% 0;
+            background-size: 5px 5px, 5px 5px, 1px 100%;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .form-group .form-select:focus,
+        .form-group .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .form-group .form-select option {
+            background: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+
 <body>
     <div class="login">
-       <h1>Student Exam Performance Indicator</h1>
-   
-       <form action="{{ url_for('predict_datapoint')}}" method="post">
-        <h1>
-            <legend>Student Exam Performance Prediction</legend>
-        </h1>
-        <div class="mb-3">
-            <label class="form-label">Gender</label>
-            <select class="form-control" name="gender" placeholder="Enter you Gender" required>
-                <option class="placeholder" selected disabled value="">Select your Gender</option>
-                <option value="male">
-                    Male
-                </option>
-                <option value="female">
-                    Female
-                </option>
-            </select>
+        <h1>Student Exam Performance Indicator</h1>
+        <form id="predictionForm">
+            <div class="form-container">
+                <div class="mb-3 form-group">
+                    <label class="form-label" for="gender">Gender</label>
+                    <select id="gender" class="form-select" name="gender" required>
+                        <option selected disabled value="">Select your Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="mb-3 form-group">
+                    <label class="form-label" for="ethnicity">Race or Ethnicity</label>
+                    <select id="ethnicity" class="form-select" name="ethnicity" required>
+                        <option selected disabled value="">Select Ethnicity</option>
+                        <option value="group A">Group A</option>
+                        <option value="group B">Group B</option>
+                        <option value="group C">Group C</option>
+                        <option value="group D">Group D</option>
+                        <option value="group E">Group E</option>
+                    </select>
+                </div>
+                <div class="mb-3 form-group">
+                    <label class="form-label" for="parental_level_of_education">Parental Level of Education</label>
+                    <select id="parental_level_of_education" class="form-select" name="parental_level_of_education" required>
+                        <option selected disabled value="">Select Parent Education</option>
+                        <option value="associate's degree">Associate's degree</option>
+                        <option value="bachelor's degree">Bachelor's degree</option>
+                        <option value="high school">High school</option>
+                        <option value="master's degree">Master's degree</option>
+                        <option value="some college">Some college</option>
+                        <option value="some high school">Some high school</option>
+                    </select>
+                </div>
+                <div class="mb-3 form-group">
+                    <label class="form-label" for="lunch">Lunch Type</label>
+                    <select id="lunch" class="form-select" name="lunch" required>
+                        <option selected disabled value="">Select Lunch Type</option>
+                        <option value="free/reduced">Free/reduced</option>
+                        <option value="standard">Standard</option>
+                    </select>
+                </div>
+                <div class="mb-3 form-group">
+                    <label class="form-label" for="test_preparation_course">Test Preparation Course</label>
+                    <select id="test_preparation_course" class="form-select" name="test_preparation_course" required>
+                        <option selected disabled value="">Select Test Course</option>
+                        <option value="none">None</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="mb-3 form-group">
+                    <label class="form-label" for="writing_score">Writing Score out of 100</label>
+                    <input id="writing_score" class="form-control" type="number" name="writing_score" placeholder="Enter your Writing Score" min="0" max="100" required>
+                </div>
+                <div class="mb-3 form-group">
+                    <label class="form-label" for="reading_score">Reading Score out of 100</label>
+                    <input id="reading_score" class="form-control" type="number" name="reading_score" placeholder="Enter your Reading Score" min="0" max="100" required>
+                </div>
+                <div class="text-center">
+                    <button id="submitButton" class="btn btn-primary" type="submit">
+                        <span class="btn-text">Predict your Maths Score</span>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div id="resultContainer" class="result-container">
+            <h2>The prediction is <span id="result">{{ results }}</span></h2>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Race or Ethnicity</label>
-            <select class="form-control" name="ethnicity" placeholder="Enter you ethnicity" required>
-                <option class="placeholder" selected disabled value="">Select Ethnicity</option>
-                <option value="group A">
-                    Group A
-                </option>
-                <option value="group B">
-                    Group B
-                </option>
-                <option value="group C">
-                    Group C
-                </option>
-                <option value="group D">
-                    Group D
-                </option>
-                <option value="group E">
-                    Group E
-                </option>
-            </select>
+        <div id="errorContainer" class="error-container">
+            <h2>An error occurred. Please try again.</h2>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Parental Level of Education</label>
-            <select class="form-control" name="parental_level_of_education"
-                placeholder="Enter you Parent Education" required>
-                <option class="placeholder" selected disabled value="">Select Parent Education</option>
-                <option value="associate's degree">
-                    associate's degree
-                </option>
-                <option value="bachelor's degree">
-                    bachelor's degree
-                </option>
-                <option value="high school">
-                    high school
-                </option>
-                <option value="master's degree">
-                    master's degree
-                </option>
-                <option value="some college">
-                    some college
-                </option>
-                <option value="some high school">
-                    some high school
-                </option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Lunch Type</label>
-            <select class="form-control" name="lunch" placeholder="Enter you Lunch" required>
-                <option class="placeholder" selected disabled value="">Select Lunch Type</option>
-                <option value="free/reduced">
-                    free/reduced
-                </option>
-                <option value="standard">
-                    standard
-                </option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Test preparation Course</label>
-            <select class="form-control" name="test_preparation_course" placeholder="Enter you Course"
-                required>
-                <option class="placeholder" selected disabled value="">Select Test_course</option>
-                <option value="none">
-                    None
-                </option>
-                <option value="completed">
-                    Completed
-                </option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Writing Score out of 100</label>
-            <input class="form-control" type="number" name="reading_score"
-                placeholder="Enter your Reading score" min='0' max='100' />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Reading Score out of 100</label>
-            <input class="form-control" type="number" name="writing_score"
-                placeholder="Enter your Reading Score" min='0' max='100' />
-        </div>
-        <div class="mb-3">
-            <input class="btn btn-primary" type="submit" value="Predict your Maths Score" required />
-        </div>
-    </form>
-    <h2>
-       THE  prediction is {{results}}
-    </h2>
-   <body>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const submitButton = document.getElementById('submitButton');
+            const resultContainer = document.getElementById('resultContainer');
+            const errorContainer = document.getElementById('errorContainer');
+            const resultElement = document.getElementById('result');
+
+submitButton.classList.add('loading');
+resultContainer.style.display = 'none';
+errorContainer.style.display = 'none';
+
+fetch('{{ url_for("predict_datapoint") }}', {
+    method: 'POST',
+    body: new FormData(this),
+})
+    .then(response => response.json())
+    .then(data => {
+        submitButton.classList.remove('loading');
+        if (data.results) {
+            resultElement.textContent = data.results;
+            resultContainer.style.display = 'block';
+        } else {
+            errorContainer.style.display = 'block';
+        }
+    })
+    .catch(() => {
+        submitButton.classList.remove('loading');
+        errorContainer.style.display = 'block';
+    });
+});
+</script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
 </html>

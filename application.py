@@ -1,8 +1,3 @@
-"""
-    For deployment purpose. Since python.config file 
-    consists of this.
-"""
-
 from flask import Flask,request,render_template
 import numpy as np
 import pandas as pd
@@ -49,5 +44,5 @@ def predict_datapoint():
     
 
 if __name__ == "__main__":
-    app.run(host = "0.0.0.0", port=5001, debug=True)        
+    app.run(host = "0.0.0.0", port=5001)        
 
